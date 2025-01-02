@@ -32,6 +32,7 @@ $(OUT_DIR):
 
 $(ELF_FILE): $(OBJ_FILES)
 	$(CC) $(LDFLAGS) -o $@ $^
+	avr-size $(AVRSIZE_FLAGS) $@
 
 $(HEX_FILE): $(ELF_FILE)
 	avr-objcopy -O ihex -R .eeprom $< $@

@@ -5,6 +5,14 @@
 #include "../inc/num_types.h"
 #include "../inc/twi.h"
 
+#define SCL_PORT	PORTD
+#define SCL_DDR 	DDRD
+#define SCL_PIN 	PD0
+
+#define SDA_PORT	PORTD
+#define SDA_DDR 	DDRD
+#define SDA_PIN 	PD1
+
 // static u8 twi_slarw;
 // static u8 twi_buffer[TWI_BUFFER_LENGTH];
 // static u8 twi_buffer_length;
@@ -18,7 +26,9 @@ static void twi_disable(void);
 
 static void twi_enable(void)
 {
-	// TODO Enable pullups
+	SCL_PORT |= _BV(SCL_PIN);		// Activate internal pullups
+	SDA_PORT |= _BV(SDA_PIN);
+
 	power_twi_enable();			// Power up TWI module
 
 	TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); 	// Prescaler = 1
@@ -29,10 +39,12 @@ static void twi_enable(void)
 
 static void twi_disable(void)
 {
-	// TODO Disable pullups
 	// TODO Disable interrupts
 	TWCR &= ~(_BV(TWEN) | _BV(TWEA));	// Disable TWI & ACK
 	power_twi_disable();			// Power down TWI module
+
+	SCL_PORT &= ~_BV(SCL_PIN);		// Disable internal pullups
+	SDA_PORT &= ~_BV(SDA_PIN);
 }
 
 static void twi_start(void)

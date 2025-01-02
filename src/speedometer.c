@@ -1,22 +1,29 @@
 #include <avr/io.h>
 #include <avr/power.h>
 #include <avr/sleep.h>
+#include <util/delay.h>
 
 #include "../inc/led.h"
-#include "../inc/oled.h"
 #include "../inc/sensor.h"
+#include "../inc/status_display.h"
+#include "../inc/ssd1306.h"
 #include "../inc/time.h"
 
-#define SCREEN_WIDTH	(128)	// OLED display width in pixels
-#define SCREEN_HEIGHT 	(64)	// OLED display height in pixels
-#define SCREEN_ADDRESS 	(0x3D)	// TWI Address
+#define SSD1306_TWI_ADDRESS 	(0x3D)
+#define MILLIS_PER_SECOND	(1000)
 
 void setup(void);
 void loop(void);
 int main(void);
 
 static struct SSD1306 oled;
-static u8 oled_buffer[OLED_BUFFER_SIZE(SCREEN_WIDTH, SCREEN_HEIGHT)];
+
+void ssd1306_test(void)
+{
+	// ssd1306_putc(&oled, 'A');
+	// ssd1306_display(&oled);
+	return;
+}
 
 /* Initialize all hardware modules and software variables */
 void setup(void)
@@ -29,30 +36,30 @@ void setup(void)
 	set_sleep_mode(SLEEP_MODE_IDLE);	// Set sleep mode used to idle
 
 	// Initialize hardware and software
-	oled_init(
-		&oled,
-		SCREEN_ADDRESS,
-		SCREEN_WIDTH,
-		SCREEN_HEIGHT,
-		oled_buffer
-	);
+	ssd1306_init(&oled, SSD1306_TWI_ADDRESS);
 	sensor_init();
 	millis_init();
 
-	oled_test(&oled);
+	ssd1306_test();
+
+	return;
 }
 
 /* Update OLED display with measured information every second */
 void loop(void)
 {
-	// Ignore timer 0 interrupts to set millis, only wake up on timer 3
-	if (millis() % 1000 == 0) {
-		// power_twi_enable();
-		// oled_update();
-		// power_twi_disable();
+	static struct SensorMeasurements measurements;
+
+	// Process measurements once a second
+	if (millis() % MILLIS_PER_SECOND == 0) {
+		LED_PORT ^= _BV(LED_PIN);
+		sensor_get_measurements(&measurements);
+		ssd1306_update(&oled, &measurements);
 	}
 
 	sleep_mode();	// Enter low-power mode when waiting
+
+	return;
 }
 
 int main(void)
@@ -62,5 +69,7 @@ int main(void)
 	for (;;) {
 		loop();
 	}
+
+	return 0;
 }
 

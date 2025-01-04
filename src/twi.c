@@ -5,13 +5,13 @@
 #include "../inc/num_types.h"
 #include "../inc/twi.h"
 
-#define SCL_PORT	PORTD
-#define SCL_DDR 	DDRD
-#define SCL_PIN 	PD0
+#define SCL_PORT PORTD
+#define SCL_DDR  DDRD
+#define SCL_PIN  PD0
 
-#define SDA_PORT	PORTD
-#define SDA_DDR 	DDRD
-#define SDA_PIN 	PD1
+#define SDA_PORT PORTD
+#define SDA_DDR  DDRD
+#define SDA_PIN  PD1
 
 // static u8 twi_slarw;
 // static u8 twi_buffer[TWI_BUFFER_LENGTH];
@@ -26,24 +26,24 @@ static void twi_disable(void);
 
 static void twi_enable(void)
 {
-	SCL_PORT |= _BV(SCL_PIN);		// Activate internal pullups
-	SDA_PORT |= _BV(SDA_PIN);
+	SCL_PORT |= _BV(SCL_PIN);             // Activate internal pullups
+	SDA_PORT |= _BV(SDA_PIN);             //
 
-	power_twi_enable();			// Power up TWI module
+	power_twi_enable();                   // Power up TWI module
 
-	TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); 	// Prescaler = 1
-	TWBR = ((F_CPU / TWI_FREQ) - 16) / 2; 	// Set bit rate
+	TWSR &= ~(_BV(TWPS0) | _BV(TWPS1));   // Prescaler = 1
+	TWBR = ((F_CPU / TWI_FREQ) - 16) / 2; // Set bit rate
 	// TODO Enable interrupts TWIE
-	TWCR = _BV(TWEN) | _BV(TWEA); 		// Enable TWI & ACK
+	TWCR = _BV(TWEN) | _BV(TWEA); // Enable TWI & ACK
 }
 
 static void twi_disable(void)
 {
 	// TODO Disable interrupts
-	TWCR &= ~(_BV(TWEN) | _BV(TWEA));	// Disable TWI & ACK
-	power_twi_disable();			// Power down TWI module
+	TWCR &= ~(_BV(TWEN) | _BV(TWEA)); // Disable TWI & ACK
+	power_twi_disable();              // Power down TWI module
 
-	SCL_PORT &= ~_BV(SCL_PIN);		// Disable internal pullups
+	SCL_PORT &= ~_BV(SCL_PIN);        // Disable internal pullups
 	SDA_PORT &= ~_BV(SDA_PIN);
 }
 
@@ -51,21 +51,21 @@ static void twi_start(void)
 {
 	// Send START
 	TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN) | _BV(TWEA);
-	loop_until_bit_is_set(TWCR, TWINT); 	// Wait for START to complete
+	loop_until_bit_is_set(TWCR, TWINT); // Wait for START to complete
 
-	if (TW_START != TW_STATUS) { 		// Ensure valid start
-		// ERROR
+	if (TW_START != TW_STATUS) {        // Ensure valid start
+		                            // ERROR
 	}
 }
 
 static void twi_send_slarw(u8 twi_slarw)
 {
-	TWDR = twi_slarw;  			// Prepare SLA+R/~W
+	TWDR = twi_slarw;                          // Prepare SLA+R/~W
 	TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWEA); // Send device address
-	loop_until_bit_is_set(TWCR, TWINT); 	// Wait for TX to complete
+	loop_until_bit_is_set(TWCR, TWINT);        // Wait for TX to complete
 
-	if (TW_MT_SLA_ACK != TW_STATUS) { 	// Ensure address acknowledged
-		// ERROR
+	if (TW_MT_SLA_ACK != TW_STATUS) { // Ensure address acknowledged
+		                          // ERROR
 	}
 }
 
@@ -79,12 +79,12 @@ static void twi_stop(void)
 
 static void twi_write(u8 data)
 {
-	TWDR = data; 				// Load data into data register
-	TWCR = _BV(TWINT) | _BV(TWEN); 		// Send data
-	loop_until_bit_is_set(TWCR, TWINT); 	// Wait for TX to complete
+	TWDR = data;                        // Load data into data register
+	TWCR = _BV(TWINT) | _BV(TWEN);      // Send data
+	loop_until_bit_is_set(TWCR, TWINT); // Wait for TX to complete
 
-	if (TW_MT_DATA_ACK != TW_STATUS) { 	// Ensure data acknowledged
-		// ERROR
+	if (TW_MT_DATA_ACK != TW_STATUS) {  // Ensure data acknowledged
+		                            // ERROR
 	}
 }
 

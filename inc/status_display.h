@@ -6,8 +6,8 @@
 
 /* Update quantities displayed on OLED */
 void ssd1306_update(
-	struct SSD1306* oled,
-	const struct SensorMeasurements* measurements
+		struct SSD1306* oled,
+		const struct SensorMeasurements* measurements
 );
 
 #endif // __STATUS_DISPLAY_H

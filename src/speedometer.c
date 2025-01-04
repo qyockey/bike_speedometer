@@ -5,12 +5,12 @@
 
 #include "../inc/led.h"
 #include "../inc/sensor.h"
-#include "../inc/status_display.h"
 #include "../inc/ssd1306.h"
+#include "../inc/status_display.h"
 #include "../inc/time.h"
 
-#define SSD1306_TWI_ADDRESS 	(0x3D)
-#define MILLIS_PER_SECOND	(1000)
+#define SSD1306_TWI_ADDRESS (0x3D)
+#define MILLIS_PER_SECOND   (1000)
 
 void setup(void);
 void loop(void);
@@ -30,10 +30,10 @@ void setup(void)
 {
 	LED_DDR |= _BV(LED_PIN);
 
-	ADCSRA &= ~_BV(ADEN);	// Disable ADC
-	power_all_disable();	// Remove power from all unused devices
+	ADCSRA &= ~_BV(ADEN);            // Disable ADC
+	power_all_disable();             // Remove power from all unused devices
 
-	set_sleep_mode(SLEEP_MODE_IDLE);	// Set sleep mode used to idle
+	set_sleep_mode(SLEEP_MODE_IDLE); // Set sleep mode used to idle
 
 	// Initialize hardware and software
 	ssd1306_init(&oled, SSD1306_TWI_ADDRESS);
@@ -57,7 +57,8 @@ void loop(void)
 		ssd1306_update(&oled, &measurements);
 	}
 
-	sleep_mode();	// Enter low-power mode when waiting
+	// Enter low-power mode when waiting
+	sleep_mode();
 
 	return;
 }

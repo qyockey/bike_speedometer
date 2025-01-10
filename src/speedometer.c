@@ -58,7 +58,7 @@ void loop(void)
 	}
 
 	// Enter low-power mode when waiting
-	sleep_mode();
+	// sleep_mode();
 
 	return;
 }

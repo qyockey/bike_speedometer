@@ -51,7 +51,9 @@ static void twi_start(void)
 {
 	// Send START
 	TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN) | _BV(TWEA);
+#ifndef DEBUG
 	loop_until_bit_is_set(TWCR, TWINT); // Wait for START to complete
+#endif
 
 	if (TW_START != TW_STATUS) {        // Ensure valid start
 		                            // ERROR
@@ -62,7 +64,9 @@ static void twi_send_slarw(u8 twi_slarw)
 {
 	TWDR = twi_slarw;                          // Prepare SLA+R/~W
 	TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWEA); // Send device address
+#ifndef DEBUG
 	loop_until_bit_is_set(TWCR, TWINT);        // Wait for TX to complete
+#endif
 
 	if (TW_MT_SLA_ACK != TW_STATUS) { // Ensure address acknowledged
 		                          // ERROR

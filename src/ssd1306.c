@@ -149,7 +149,9 @@ void ssd1306_init(struct SSD1306* oled, u8 twi_addr)
 	oled->cursor_y  = SSD1306_PAGE_START;
 	oled->font_size = FontSize_6x8;
 
+#ifndef DEBUG
 	_delay_ms(SSD1306_DELAY_POWER_ON);
+#endif
 
 	static const PROGMEM u8 init_cmds[] = {
 			// Display off during configuration
@@ -158,7 +160,7 @@ void ssd1306_init(struct SSD1306* oled, u8 twi_addr)
 			// Set memory addressing mode to horizontal
 			SSD1306_SetMemoryMode, 0x00,
 
-			// Set display start line to ... TODO
+			// Set display start line to top
 			// SSD1306_SetDisplayStartLine | 0x00,
 
 			// Set segment remap (column 127 mapped to SEG0)
@@ -180,8 +182,7 @@ void ssd1306_init(struct SSD1306* oled, u8 twi_addr)
 			SSD1306_SetDisplayOffset, 0x00,
 
 			// Set display clock divide ratio/oscillator frequency
-			// to
-			//	default value
+			// to default value
 			SSD1306_SetDisplayClockDiv, 0x80,
 
 			// Set precharge period to default period
@@ -216,34 +217,6 @@ void ssd1306_init(struct SSD1306* oled, u8 twi_addr)
 
 	// Display on after configuration
 	ssd1306_command(oled, SSD1306_DisplayOn);
-
-	PORTC |= _BV(PC7);
-
-	twi_mtx_begin(oled->twi_addr);
-	twi_mtx_write_byte(SSD1306_Command);
-	twi_mtx_write_byte(SSD1306_SetDisplayStartLine | 0x20);
-	twi_mtx_end();
-
-	twi_mtx_begin(oled->twi_addr);
-	twi_mtx_write_byte(SSD1306_Data);
-	for (u8 i = 255; i >= 192; --i) {
-		twi_mtx_write_byte(i);
-	}
-	twi_mtx_end();
-
-	_delay_ms(200);
-
-	// _delay_ms(200);
-
-	// twi_mtx_begin(oled->twi_addr);
-	// twi_mtx_write_byte(SSD1306_Data);
-	// for (u8 i = 0; i < TEXT_WIDTH; ++i) {
-	// 	twi_mtx_write_byte(i);
-	// }
-	// twi_mtx_end();
-
-	_delay_ms(2000);
-	PORTC &= ~_BV(PC7);
 
 	return;
 }
@@ -298,11 +271,12 @@ void ssd1306_putc(struct SSD1306* oled, char c)
 	}
 
 	const u8* glyph = get_glyph(oled->font_size, c);
-	for (u8 i = 0; i < TEXT_WIDTH; ++i) {
-		oled->buffer[oled->cursor_y][oled->cursor_x] =
-				pgm_read_byte(glyph + i);
-		ssd1306_advance_cursor(oled);
+	for (u8 col = 0; col < TEXT_WIDTH; ++col) {
+		oled->buffer[oled->cursor_y]
+			    [TEXT_WIDTH * oled->cursor_x + col] =
+				pgm_read_byte(glyph + col);
 	}
+	ssd1306_advance_cursor(oled);
 
 	return;
 }
@@ -326,18 +300,19 @@ void ssd1306_display(const struct SSD1306* oled)
 		return;
 	}
 
-	// ssd1306_data_list(oled, (u8*) oled->buffer, SSD1306_BUFFER_SIZE);
+	static const PROGMEM u8 set_ranges[] = {
+			// Set column range to all columns
+			SSD1306_SetColumnRange, SSD1306_COLUMN_START,
+			SSD1306_COLUMN_END,
 
-	twi_mtx_begin(oled->twi_addr);
-	twi_mtx_write_byte(SSD1306_Data);
+			// Set page range to all pages
+			SSD1306_SetPageRange, SSD1306_PAGE_START,
+			SSD1306_PAGE_END
+	};
 
-	for (u8 page = 0; page < SSD1306_PAGES; ++page) {
-		for (u8 col = 0; col < SSD1306_COLUMNS; ++col) {
-			twi_mtx_write_byte(oled->buffer[page][col]);
-		}
-	}
+	ssd1306_command_list(oled, set_ranges, sizeof(set_ranges));
 
-	twi_mtx_end();
+	ssd1306_data_list(oled, (u8*) oled->buffer, SSD1306_BUFFER_SIZE);
 
 	return;
 }

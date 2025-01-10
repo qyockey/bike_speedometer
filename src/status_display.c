@@ -84,8 +84,8 @@ void ssd1306_update(
 	f64_to_str_2p1(distance_traveled_str, measurements->distance_traveled);
 	set_time_str(time_str);
 
-	ssd1306_set_cursor(oled, 0, 0);
 	ssd1306_clear(oled);
+	ssd1306_set_cursor(oled, 0, 0);
 
 	ssd1306_puts(oled, velocity_sample_str);
 	ssd1306_puts(oled, " kph\n");

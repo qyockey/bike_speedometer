@@ -85,79 +85,47 @@ void ssd1306_update(
 	set_time_str(time_str);
 
 	ssd1306_clear(oled);
-	ssd1306_set_cursor(oled, 0, 0);
 
+	// ssd1306_set_cursor(oled, 0, 0);
+	// ssd1306_set_font(oled, FontSize_6x8);
+	// ssd1306_puts(oled, velocity_sample_str);
+	// ssd1306_puts(oled, " kph\n");
+	// ssd1306_puts(oled, velocity_average_str);
+	// ssd1306_puts(oled, " kph avg\n");
+	// ssd1306_puts(oled, distance_traveled_str);
+	// ssd1306_puts(oled, " km\n");
+	// ssd1306_puts(oled, time_str);
+	// ssd1306_putc(oled, '\n');
+	// ssd1306_display(oled);
+
+	ssd1306_set_cursor(oled, 1, 1);
+	ssd1306_set_font(oled, FontSize_18x24);
 	ssd1306_puts(oled, velocity_sample_str);
-	ssd1306_puts(oled, " kph\n");
-
+	ssd1306_set_font(oled, FontSize_6x8);
+	ssd1306_set_cursor(oled, 1, 7);
+	ssd1306_puts(oled, "k");
+	ssd1306_set_cursor(oled, 2, 7);
+	ssd1306_puts(oled, "p");
+	ssd1306_set_cursor(oled, 3, 7);
+	ssd1306_puts(oled, "h");
+	ssd1306_set_cursor(oled, 5, 1);
+	ssd1306_set_font(oled, FontSize_12x16);
 	ssd1306_puts(oled, velocity_average_str);
-	ssd1306_puts(oled, " kph avg\n");
-
+	ssd1306_set_font(oled, FontSize_6x8);
+	ssd1306_puts(oled, "kph");
+	ssd1306_set_cursor(oled, 6, 5);
+	ssd1306_puts(oled, "avg");
+	ssd1306_set_cursor(oled, 1, 10);
+	ssd1306_set_font(oled, FontSize_12x16);
 	ssd1306_puts(oled, distance_traveled_str);
-	ssd1306_puts(oled, " km\n");
-
+	ssd1306_set_cursor(oled, 2, 18);
+	ssd1306_set_font(oled, FontSize_6x8);
+	ssd1306_puts(oled, "km");
+	ssd1306_set_cursor(oled, 5, 10);
+	ssd1306_set_font(oled, FontSize_12x16);
 	ssd1306_puts(oled, time_str);
-	ssd1306_putc(oled, '\n');
-
+	
 	ssd1306_display(oled);
-
-	// #ifdef NO_PRETTY
-	// 	oled.setCursor(0, 0);
-	//
-	// 	oled.print(velocity_sample);
-	// 	oled.println(" kph");
-	//
-	// 	oled.print(velocity_average);
-	// 	oled.println(" kph avg");
-	//
-	// 	oled.print(distance);
-	// 	oled.println(" km");
-	//
-	// 	oled_print_padded(minutes);
-	// 	oled.print(":");
-	// 	oled_print_padded(seconds);
-	// 	oled.println();
-	//
-	// 	oled.print(pulses);
-	// 	oled.println(" pulses");
-	//
-	// #else
-	// 	oled.setCursor(6, 8);
-	// 	oled.setTextSize(3);
-	// 	oled_print_padded((u8) velocity_sample);
-	// 	oled.setTextSize(1);
-	// 	oled.setCursor(7 * 6, 1 * 8);
-	// 	oled.print("k");
-	// 	oled.setCursor(7 * 6, 2 * 8 - 1);
-	// 	oled.print("p");
-	// 	oled.setCursor(7 * 6, 3 * 8);
-	// 	oled.print("h");
-	//
-	// 	oled.setCursor(1 * 6, 5 * 8);
-	// 	oled.setTextSize(2);
-	// 	oled_print_padded((u8) velocity_average);
-	// 	oled.setTextSize(1);
-	// 	oled.print("kph");
-	// 	oled.setCursor(5 * 6, 6 * 8);
-	// 	oled.print("avg");
-	//
-	// 	oled.setCursor(10 * 6, 1 * 8 + 4);
-	// 	oled.setTextSize(2);
-	// 	oled_print_padded((u8) distance);
-	// 	oled.print(".");
-	// 	oled.print(((u8) (10 * distance)) % 10, DEC);
-	// 	oled.setCursor(18 * 6, 2 * 8);
-	// 	oled.setTextSize(1);
-	// 	oled.print("km");
-	//
-	// 	oled.setCursor(10 * 6, 5 * 8);
-	// 	oled.setTextSize(2);
-	// 	oled_print_padded(minutes);
-	// 	oled.print(":");
-	// 	oled_print_padded(seconds);
-	// #endif
-	//
-	// 	oled.display();
 
 	return;
 }

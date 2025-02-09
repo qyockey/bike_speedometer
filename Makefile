@@ -10,6 +10,7 @@ CFLAGS		:= -mmcu=$(MCU) -DF_CPU=$(F_CPU)UL -Os -Wall -Wextra -Wpedantic
 LDFLAGS		:= -mmcu=$(MCU)
 AVRDUDE_FLAGS	:= -v -c avr109 -p $(MCU) -P $(PORT) -b 57600 -D
 AVRSIZE_FLAGS	:= --mcu=$(MCU) --format=avr
+SIMAVR_FLAGS	:= -g -m $(MCU) -f $(F_CPU)
 
 SRC_DIR := ./src
 INC_DIR := ./inc
@@ -40,6 +41,13 @@ $(HEX_FILE): $(ELF_FILE)
 .PHONY: upload
 upload: $(HEX_FILE)
 	avrdude $(AVRDUDE_FLAGS) -U flash:w:$<
+
+.PHONY: debug
+debug: CFLAGS += -g -DDEBUG -O0
+debug: LDFLAGS += -g
+debug: $(ELF_FILE)
+	simavr $(SIMAVR_FLAGS) $(ELF_FILE) &
+	avr-gdb $(ELF_FILE)
 
 .PHONY: clean
 clean:

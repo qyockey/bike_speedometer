@@ -13,8 +13,8 @@
 #define SSD1306_PAGE_START     (0)
 #define SSD1306_PAGE_END       (SSD1306_PAGES - 1)
 
-#define SSD1306_TEXT_COLUMNS   (SSD1306_COLUMNS / TEXT_WIDTH)
-#define SSD1306_TEXT_ROWS      (SSD1306_ROWS / TEXT_HEIGHT)
+#define SSD1306_BLOCK_COLUMNS  (SSD1306_COLUMNS / BLOCK_WIDTH)
+#define SSD1306_BLOCK_ROWS     (SSD1306_ROWS / BLOCK_HEIGHT)
 
 #define SSD1306_DELAY_POWER_ON (2500)
 
@@ -58,7 +58,6 @@ enum SSD1306_ChargePump {
 static void ssd1306_command(const struct SSD1306* oled, u8 cmd);
 static void
 ssd1306_command_list(const struct SSD1306* oled, const u8* cmds, u8 length);
-static void ssd1306_data(const struct SSD1306* oled, u8 data);
 static void ssd1306_data_list(const struct SSD1306* oled, u8* data, u16 length);
 static void ssd1306_newline(struct SSD1306* oled);
 static void ssd1306_advance_cursor(struct SSD1306* oled);
@@ -83,16 +82,6 @@ ssd1306_command_list(const struct SSD1306* oled, const u8* cmds, u8 length)
 		twi_mtx_write_byte(pgm_read_byte(cmds + i));
 	}
 
-	twi_mtx_end();
-
-	return;
-}
-
-static void ssd1306_data(const struct SSD1306* oled, u8 data)
-{
-	twi_mtx_begin(oled->twi_addr);
-	twi_mtx_write_byte(SSD1306_Data);
-	twi_mtx_write_byte(data);
 	twi_mtx_end();
 
 	return;
@@ -131,8 +120,11 @@ static void ssd1306_advance_cursor(struct SSD1306* oled)
 	}
 
 	oled->cursor_x += oled->font_size;
-	if (oled->cursor_x >= SSD1306_TEXT_COLUMNS) {
+	if (oled->cursor_x >= SSD1306_BLOCK_COLUMNS) {
 		ssd1306_newline(oled);
+	}
+	if (oled->cursor_y >= SSD1306_BLOCK_ROWS) {
+		oled->cursor_y = 0;
 	}
 
 	return;
@@ -270,12 +262,33 @@ void ssd1306_putc(struct SSD1306* oled, char c)
 		return;
 	}
 
+	const u8 font_width = BLOCK_WIDTH * oled->font_size;
+
 	const u8* glyph = get_glyph(oled->font_size, c);
-	for (u8 col = 0; col < TEXT_WIDTH; ++col) {
-		oled->buffer[oled->cursor_y]
-			    [TEXT_WIDTH * oled->cursor_x + col] =
-				pgm_read_byte(glyph + col);
+	for (u8 page_d = 0; page_d < oled->font_size; ++page_d) {
+		for (u8 col_d = 0; col_d < oled->font_size; ++col_d) {
+			for (u8 i = 0; i < SMALL_FONT_WIDTH; ++i) {
+				const u8 page = oled->cursor_y + page_d;
+				const u8 col  = (oled->cursor_x + col_d) *
+						BLOCK_WIDTH + i;
+				const u8* glyph_byte = glyph +
+						page_d * font_width +
+						col_d * BLOCK_WIDTH + i;
+				oled->buffer[page][col] =
+						pgm_read_byte(glyph_byte);
+			}
+		}
 	}
+
+#ifdef DEBUG
+	for (u8 page_d = 0; page_d < oled->font_size; ++page_d) {
+		for (u8 col_d = 0; col_d < oled->font_size; ++col_d) {
+			oled->chars[oled->cursor_y + page_d]
+				   [oled->cursor_x + col_d] = c;
+		}
+	}
+#endif
+
 	ssd1306_advance_cursor(oled);
 
 	return;
@@ -312,7 +325,7 @@ void ssd1306_display(const struct SSD1306* oled)
 
 	ssd1306_command_list(oled, set_ranges, sizeof(set_ranges));
 
-	ssd1306_data_list(oled, (u8*) oled->buffer, SSD1306_BUFFER_SIZE);
+	ssd1306_data_list(oled, (u8*)oled->buffer, SSD1306_BUFFER_SIZE);
 
 	return;
 }

@@ -3,18 +3,22 @@
 
 #include "num_types.h"
 
-#define SMALL_FONT_WIDTH  (6)
-#define SMALL_FONT_HEIGHT (8)
+#define BLOCK_WIDTH        (6)
+#define BLOCK_HEIGHT       (8)
 
-#define LARGE_FONT_WIDTH  (12)
-#define LARGE_FONT_HEIGHT (16)
+#define SMALL_FONT_WIDTH   (FontSize_6x8 * BLOCK_WIDTH)
+#define SMALL_FONT_HEIGHT  (FontSize_6x8 * BLOCK_HEIGHT)
 
-#define TEXT_WIDTH        (SMALL_FONT_WIDTH)
-#define TEXT_HEIGHT       (SMALL_FONT_HEIGHT)
+#define MEDIUM_FONT_WIDTH  (FontSize_12x16 * BLOCK_WIDTH)
+#define MEDIUM_FONT_HEIGHT (FontSize_12x16 * BLOCK_HEIGHT)
+
+#define LARGE_FONT_WIDTH   (FontSize_18x24 * BLOCK_WIDTH)
+#define LARGE_FONT_HEIGHT  (FontSize_18x24 * BLOCK_HEIGHT)
 
 enum FontSize {
 	FontSize_6x8   = 1,
 	FontSize_12x16 = 2,
+	FontSize_18x24 = 3,
 };
 
 const u8* get_glyph(enum FontSize font_size, char c);

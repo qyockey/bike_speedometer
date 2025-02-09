@@ -28,8 +28,6 @@ void ssd1306_test(void)
 /* Initialize all hardware modules and software variables */
 void setup(void)
 {
-	LED_DDR |= _BV(LED_PIN);
-
 	ADCSRA &= ~_BV(ADEN);            // Disable ADC
 	power_all_disable();             // Remove power from all unused devices
 
@@ -52,13 +50,14 @@ void loop(void)
 
 	// Process measurements once a second
 	if (millis() % MILLIS_PER_SECOND == 0) {
-		LED_PORT ^= _BV(LED_PIN);
 		sensor_get_measurements(&measurements);
 		ssd1306_update(&oled, &measurements);
 	}
 
+#ifndef DEBUG
 	// Enter low-power mode when waiting
-	// sleep_mode();
+	sleep_mode();
+#endif
 
 	return;
 }

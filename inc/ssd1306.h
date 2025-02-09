@@ -13,6 +13,9 @@
 struct SSD1306 {
 	u8 twi_addr;
 	u8 buffer[SSD1306_PAGES][SSD1306_COLUMNS];
+#ifdef DEBUG
+	u8 chars[8][21]; // TODO Remove
+#endif
 	u8 cursor_x;
 	u8 cursor_y;
 	enum FontSize font_size;
